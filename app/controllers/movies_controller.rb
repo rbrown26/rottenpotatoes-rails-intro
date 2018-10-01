@@ -1,9 +1,12 @@
 class MoviesController < ApplicationController
 
+  TITLE = 'title'
+  RELEASE_DATE = 'release_date'
+
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
-
+  
   def show
     id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
@@ -12,11 +15,17 @@ class MoviesController < ApplicationController
 
   def index
     @sortBy = params[:sortBy]
-    
-    if @sortBy == 'title' || 'release_date'
-      @movies = Movie.order(@sortBy)
-    else 
-      @movies = Movie.all
+    @selected_ratings = params[:ratings]
+    @all_ratings = Movie.ratings
+
+    if @sortBy == TITLE || RELEASE_DATE
+      if @selected_ratings.nil?
+        @movies = Movie.order(@sortBy)
+      else
+        @movies = Movie.where(:rating => @selected_ratings.keys).order("#{@sortBy}")
+      end
+    else
+      @movies = Movies.where(:rating => @selected_ratings.keys)
     end
   end
 

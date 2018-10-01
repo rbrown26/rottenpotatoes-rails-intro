@@ -1,3 +1,5 @@
 class Movie < ActiveRecord::Base
-    order(:sort)
+    def self.ratings
+        select('rating').distinct.order('rating ASC')
+    end
 end
