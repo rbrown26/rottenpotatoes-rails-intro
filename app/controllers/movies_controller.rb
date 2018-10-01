@@ -14,8 +14,28 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @sortBy = params[:sortBy]
-    @selected_ratings = params[:ratings]
+    if params.has_key?(:sortBy) && params.has_key?(:ratings)
+      @sortBy = params[:sortBy]
+      @selected_ratings = params[:ratings]
+      session[:sortBy] = @sortBy
+      session[:ratings] = @selected_ratings
+      redirect = false
+    elsif params.has_key?(:sortBy)
+      @sortBy = params[:sortBy]
+      @selected_ratings = session[:ratings]
+      session[:sortBy] = @sortBy
+      redirect = false
+    elsif params.has_key?(:ratings)
+      @selected_ratings = params[:ratings]
+      @sortBy = session[:sortBy]
+      session[:ratings] = @selected_ratings
+      redirect = false
+    else
+      @sortBy = session[:sortBy]
+      @selected_ratings = session[:ratings]
+      redirect = true
+    end
+    
     @all_ratings = Movie.ratings
 
     if @sortBy == TITLE || RELEASE_DATE
@@ -26,6 +46,11 @@ class MoviesController < ApplicationController
       end
     else
       @movies = Movies.where(:rating => @selected_ratings.keys)
+    end
+    
+    if redirect
+      flash.keep
+      redirect_to :sortBy => @sortBy, :ratings => @selected_ratings and return
     end
   end
 
